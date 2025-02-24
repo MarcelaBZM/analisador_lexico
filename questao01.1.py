@@ -1,7 +1,7 @@
 import ply.lex as lex
 import gradio as gr
 
-# Definição dos tokens
+# Definicao dos tokens
 tokens = (
     'NUMERO',
     'VARIAVEL',
@@ -9,29 +9,27 @@ tokens = (
     'IGUALDADE'
 )
 
-# Expressões regulares para cada token
+# Expressoes regulares para cada token
 t_ignore = ' \t'
 
 def t_NUMERO(t):
     r'\d+'
-    t.value = (t.value, int(t.value))  # (TIPO, VALOR)
+    t.value = int(t.value)
     return t
 
 def t_VARIAVEL(t):
     r'[a-zA-Z]'
-    t.value = (t.value, t.value)  # (TIPO, VALOR)
     return t
 
 def t_OPERADOR(t):
     r'[\+\-\*/]'
-    operadores = {'+': 'SOMA', '-': 'SUBTRAÇÃO', '*': 'MULTIPLICAÇÃO', '/': 'DIVISÃO'}
-    t.value = (t.value, operadores[t.value])  # (TIPO, VALOR)
+    operadores = {'+': 'SOMA', '-': 'SUBTRAÇAO', '*': 'MULTIPLICAÇAO', '/': 'DIVISAO'}
+    t.valor = operadores[t.value]  # Definindo o nome do operador
     return t
 
 def t_IGUALDADE(t):
     r'='
-    t.value = ('IGUALDADE', 'IGUALDADE')  # (TIPO, VALOR)
-    t.type = 'IGUALDADE'
+    t.valor = 'igualdade'
     return t
 
 def t_newline(t):
@@ -42,30 +40,34 @@ def t_error(t):
     print(f"Caractere ilegal: {t.value[0]}")
     t.lexer.skip(1)
 
-# Criando o analisador léxico
 lexer = lex.lex()
 
-# Função para analisar a equação e retornar os tokens formatados corretamente
 def analisar_lexicamente(equacao):
     lexer.input(equacao)
-    resultado = "TOKEN | TIPO | VALOR\n"
-    resultado += "-------------------------\n"
-    for tok in lexer:
-        tipo, valor = tok.value
-        resultado += f"{tok.value[0] if tok.type != 'IGUALDADE' else '='} | {tok.type} | {valor}\n"
-    return resultado
+    
+    # Criando uma lista para armazenar os tokens na tabela
+    tokens_tabela = []
 
-# Criando a interface Gradio
+    for tok in lexer:
+        if tok.type == "OPERADOR":
+            tokens_tabela.append([tok.value, tok.type, tok.valor])  # Usa o nome do operador
+        elif tok.type == "IGUALDADE":
+            tokens_tabela.append(["=", tok.type, "IGUALDADE"])
+        else:
+            tokens_tabela.append([tok.value, tok.type, tok.value])  # O valor repete o proprio valor
+        
+    return tokens_tabela
+
+# Criando a interface Gradio com saída em tabela
 interface = gr.Interface(
     fn=analisar_lexicamente,
-    inputs=gr.Textbox(label="Digite a equação do 1º grau"),
-    outputs=gr.Textbox(label="Análise Léxica"),
-    title="Analisador Léxico para Equações do 1º Grau",
-    description="Digite uma equação na forma ax+b=0 para ver os tokens reconhecidos.",
-    submit_btn="Analisar Lexicamente",  # Nome do botão de enviar
-    clear_btn="Limpar",  # Nome do botão de limpar
-    allow_flagging="never"  # Remove o botão Flag
+    inputs=gr.Textbox(label="Digite a equacao do 1º grau"),
+    outputs=gr.DataFrame(headers=["TOKEN", "TIPO", "VALOR"]),
+    title="Analisador Lexico para Equacoes do 1º Grau",
+    description="Digite uma equacao na forma ax+b=0 para ver os tokens reconhecidos.",
+    allow_flagging="never",  # Remove o botao "Flag"
+    submit_btn="Analisar Lexicamente",  # Renomeia o botao de envio
+    clear_btn="Limpar"  # Renomeia o botao de limpar
 )
 
-# Executa a interface
 interface.launch()
