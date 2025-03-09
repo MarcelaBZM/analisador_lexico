@@ -1,3 +1,12 @@
+#Integrantes da Equipe 02
+# Antonio Rafael Mesquita da Silva
+# Antonio Ricardo Castro Chaves
+# José Wilian de Andrade Araújo
+# Lanna Maria Ibiapina da Silva
+# Marcela Bezerra de Medeiros (Respondeu esta questão)
+# Maria Lauriane do Nascimento Galeno
+# Pamela Roberto da Silva
+
 import ply.lex as lex
 import gradio as gr
 
